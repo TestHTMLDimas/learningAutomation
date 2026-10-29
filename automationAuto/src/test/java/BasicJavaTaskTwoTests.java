@@ -4,6 +4,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.RepeatedTest;
 
@@ -27,7 +28,6 @@ public class BasicJavaTaskTwoTests {
     void testIsEven() {
         check("isEven(4)", BasicJava.isEven(4));
         check("isEven(3)", !BasicJava.isEven(3));
-
     }
 
     @Test
@@ -37,10 +37,53 @@ public class BasicJavaTaskTwoTests {
     }
 
     @Test
-    void testCheckIsPositive() {
-        check("isPositive(5)", BasicJava.isPositive(5));
-        check("isPositive(10)", BasicJava.isPositive(10));
-        check("isPositive(-1)", !BasicJava.isPositive(-1));
+    void testHasBug() {
+        check("hasBug: Bug найден", BasicJava.hasBug(new String[]{"Bug"}));
+    }
+
+    @Test
+    void testReverse() {
+        String[] actual = BasicJava.reverse(new String[]{"a", "b", "c"});
+        String[] expected = {"c", "b", "a"};
+        check("reverse", Arrays.equals(expected, actual));
+    }
+
+    @RepeatedTest(5)
+    void testSumToNWithRandomInput() {
+        int n = ThreadLocalRandom.current().nextInt(-100, 46_341);
+        int expected = n < 1 ? 0 : (int) ((long) n * (n + 1) / 2);
+        check("sumToN(" + n + ")", BasicJava.sumToN(n) == expected);
+    }
+
+    @RepeatedTest(5)
+    void testCalcAverage() {
+        List<Integer> list = Arrays.asList(
+                ThreadLocalRandom.current().nextInt(1, 10),
+                ThreadLocalRandom.current().nextInt(1, 10),
+                ThreadLocalRandom.current().nextInt(1, 10)
+        );
+        int expected = list.stream().mapToInt(Integer::intValue).sum() / list.size();
+        check("calcAverage", BasicJava.calcAverage(list) == expected);
+    }
+
+    @RepeatedTest(3)
+    void testBlastOff() {
+        int n = ThreadLocalRandom.current().nextInt(1, 6);
+        String expected = IntStream.rangeClosed(1, n)
+                .mapToObj(i -> String.valueOf(n + 1 - i))
+                .reduce((a, b) -> a + " " + b)
+                .orElse("") + " Поехали!";
+        check("blastOff(" + n + ")", expected.equals(BasicJava.blastOff(n)));
+    }
+
+    @RepeatedTest(4)
+    void testFindMax() {
+        int[] arr = new int[5];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = ThreadLocalRandom.current().nextInt(-100, 100);
+        }
+        int expected = Arrays.stream(arr).max().orElse(Integer.MIN_VALUE);
+        check("findMax", BasicJava.findMax(arr) == expected);
     }
 
     @ParameterizedTest
@@ -58,77 +101,37 @@ public class BasicJavaTaskTwoTests {
             "100, A",
             "101, Error"
     })
-
     void testGetGrade(int score, String expected) {
-        check("getGrade(" + score + ")",
-                expected.equals(BasicJava.getGrade(score)));
+        check("getGrade(" + score + ")", expected.equals(BasicJava.getGrade(score)));
     }
 
-    @Test
-    void testBlastOff() {
-        check("blastOff(3)",
-                "3 2 1 Поехали!".equals(BasicJava.blastOff(3)));
-
-        check("blastOff(1)",
-                "1 Поехали!".equals(BasicJava.blastOff(1)));
+    @ParameterizedTest
+    @CsvSource({
+            "2, 4, 2 4",
+            "5, 7, 6"
+    })
+    void testGetEvenInRange(int start, int end, String expected) {
+        check("getEvenInRange(" + start + ", " + end + ")", expected.equals(BasicJava.getEvenInRange(start, end)));
     }
 
-    @RepeatedTest(5)
-    void testSumToNWithRandomInput() {
-        int n = ThreadLocalRandom.current().nextInt(-100, 46_341);
-
-        int expected = n < 1
-                ? 0
-                : (int) ((long) n * (n + 1) / 2);
-
-        check("sumToN(" + n + ")",
-                BasicJava.sumToN(n) == expected);
+    @ParameterizedTest
+    @CsvSource({
+            "5, true",
+            "10, true",
+            "-1, false"
+    })
+    void testCheckIsPositive(int value, boolean expected) {
+        check("isPositive(" + value + ")", BasicJava.isPositive(value) == expected);
     }
 
-    @Test
-    void testHasBug() {
-        check("hasBug: Bug найден",
-                BasicJava.hasBug(new String[]{"Bug"}));
-    }
-
-    @Test
-    void testGetEvenInRange() {
-        check("getEvenInRange(1, 8)",
-                "2 4 6 8".equals(BasicJava.getEvenInRange(1, 8)));
-
-        check("getEvenInRange(3, 3)",
-                "".equals(BasicJava.getEvenInRange(3, 3)));
-    }
-
-    @Test
-    void testFindMax() {
-        check("findMax",
-                BasicJava.findMax(new int[]{-4, 9, 2, 7}) == 9);
-    }
-
-    @Test
-    void testReverse() {
-        String[] actual = BasicJava.reverse(new String[]{"a", "b", "c"});
-        String[] expected = {"c", "b", "a"};
-
-        check("reverse", Arrays.equals(expected, actual));
-    }
-
-    @Test
-    void testCalcAverage() {
-        int actual = BasicJava.calcAverage(Arrays.asList(2, 4, 9));
-
-        check("calcAverage", actual == 5);
-    }
-
-    @Test
-    void testRemoveSpecificName() {
-        List<String> actual = BasicJava.removeSpecificName(
-                Arrays.asList("Анна", "Иван", "Анна", "Олег"),
-                "Анна"
-        );
-
-        List<String> expected = Arrays.asList("Иван", "Олег");
-        check("removeSpecificName", expected.equals(actual));
+    @ParameterizedTest
+    @CsvSource({
+            "Анна,Иван,Анна,Олег,Анна,Иван,Олег"
+    })
+    void testRemoveSpecificName(String input1, String input2, String input3, String input4, String toRemove, String expected1, String expected2) {
+        List<String> inputList = Arrays.asList(input1, input2, input3, input4);
+        List<String> expectedList = Arrays.asList(expected1, expected2);
+        List<String> actual = BasicJava.removeSpecificName(inputList, toRemove);
+        check("removeSpecificName", expectedList.equals(actual));
     }
 }
