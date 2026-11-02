@@ -12,6 +12,7 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    implementation("org.assertj:assertj-core:3.27.7")
 }
 
 tasks.test {
@@ -29,9 +30,19 @@ tasks.register("runAllTests") {
     dependsOn(tasks.test)
 }
 
+tasks.test {
+    useJUnitPlatform {
+        val tags = providers.gradleProperty("testTags").orNull
+        if (tags != null) {
+            includeTags(*tags.split(",").map { it.trim() }.toTypedArray())
+        }
+    }
+}
+
 tasks.register("printAfterTests") {
     group = "verification"
 
     doLast {
         println("Test run is over")
-    }}
+    }
+}
