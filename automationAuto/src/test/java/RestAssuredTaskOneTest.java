@@ -23,11 +23,11 @@ public class RestAssuredTaskOneTest {
     @Test
     @Tag("regress")
     void givenWhenThenTest() {
+
         given()
-                .spec(basic)
                 .queryParam("page", 0)
                 .queryParam("size", 1)
-                .get("/goods/list")
+                .get(BASE_URL + "goods/list")
                 .then()
                 .log().all()
                 .statusCode(200)
@@ -37,10 +37,12 @@ public class RestAssuredTaskOneTest {
     @Test
     @Tag("regress")
     void requestSpecificationTest() {
+
         given()
+                .spec(basic)
                 .queryParam("page", 0)
                 .queryParam("size", 1)
-                .get(BASE_URL + "goods/list")
+                .get("/goods/list")
                 .then()
                 .log().all()
                 .statusCode(200)
