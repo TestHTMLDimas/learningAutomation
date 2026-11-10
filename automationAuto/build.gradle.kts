@@ -13,6 +13,8 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     implementation("org.assertj:assertj-core:3.27.7")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.3")
+    implementation("io.rest-assured:rest-assured:6.2.0")
 }
 
 tasks.test {
